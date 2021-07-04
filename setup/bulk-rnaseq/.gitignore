@@ -1,2 +1,15 @@
 # Salmon index
 index/Homo_sapiens/salmon_index
+
+# Snakemake
+.snakemake
+
+# Salmon output
+salmon/
+
+# We want to ignore a fair bit of the QC data, with the exception
+# of the HTML reports so we can use them with GH pages
+# Also does not ignore the text files for multiqc
+QC/**/*.json
+QC/**/*.zip
+

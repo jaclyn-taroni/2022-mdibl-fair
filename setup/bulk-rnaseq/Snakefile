@@ -1,0 +1,68 @@
+## Adapted from ALSF CCDL code
+
+configfile: "config.yaml"
+
+file_ids = glob_wildcards("fastq_raw/{id}_R1_combined.fastq.gz")[0]
+
+rule all:
+    input:
+        "QC/multiqc_report.html"
+
+rule multiqc:
+    input:
+        expand("QC/fastp_reports/{id}_fastp.json", id=file_ids),
+        expand("QC/fastqc_reports/{id}_R{n}_combined_fastqc.zip", id=file_ids, n=[1,2]),
+        expand("salmon/{id}/aux_info/meta_info.json", id=file_ids),
+        expand("salmon/{id}/libParams/flenDist.txt", id=file_ids)
+    output:
+        "QC/multiqc_report.html"
+    shell:
+        "multiqc --filename {output} {input}"
+
+rule fastqc:
+    input:
+        "fastq_raw/{id}.fastq.gz"
+    output:
+        "QC/fastqc_reports/{id}_fastqc.html",
+        "QC/fastqc_reports/{id}_fastqc.zip"
+    shell:
+        "fastqc {input} -o QC/fastqc_reports/"
+
+
+rule fastp:
+    input:
+        r1 = "fastq_raw/{id}_R1_combined.fastq.gz",
+        r2 = "fastq_raw/{id}_R2_combined.fastq.gz"
+    output:
+        r1 = "fastq_trimmed/{id}_R1_combined.fastq.gz",
+        r2 = "fastq_trimmed/{id}_R2_combined.fastq.gz",
+        html = "QC/fastp_reports/{id}_fastp.html",
+        json = "QC/fastp_reports/{id}_fastp.json"
+    shell:
+        "fastp --in1 {input.r1} --in2 {input.r2}"
+        " --out1 {output.r1} --out2 {output.r2}"
+        " --detect_adapter_for_pe"
+        " --html {output.html}"
+        " --json {output.json}"
+        " --report_title '{wildcards.id} report'"
+
+rule salmon:
+    input:
+        r1 = "fastq_trimmed/{id}_R1_combined.fastq.gz",
+        r2 = "fastq_trimmed/{id}_R2_combined.fastq.gz"
+    output:
+        quant = "salmon/{id}/quant.sf",
+        meta_info = "salmon/{id}/aux_info/meta_info.json",
+        flen = "salmon/{id}/libParams/flenDist.txt"
+    threads: 4
+    params:
+        outdir = "salmon/{id}",
+        index = config['salmon_index']
+    shell:
+        "salmon quant -i {params.index}"
+        " -l A"
+        " -1 {input.r1} -2 {input.r2}"
+        " -o {params.outdir}"
+        " --threads {threads}"
+        " --gcBias"
+        " --seqBias"

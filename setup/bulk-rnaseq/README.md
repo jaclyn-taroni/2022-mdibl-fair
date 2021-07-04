@@ -18,3 +18,11 @@ We use AnnotationHub to do get the required TSV, assuming that the most recent E
 ```
 Rscript scripts/prepare-tx2gene.R
 ```
+
+#### QC, preprocessing, and quantification
+
+We run FastQC, fastp, Salmon, and MultiQC via Snakemake:
+
+```
+snakemake --cores 1
+```
