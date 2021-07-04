@@ -281,7 +281,7 @@ txi$counts[1:5, 1:5]
 
 Here's what it looks like (numbers may vary _slightly_):
 
-> ```r
+> ```
 >                 1_ATCACG_L001 13_AGTCAA_L001 17_ATCACG_L002 21_ACAGTG_L002 25_GATCAG_L002
 > ENSG00000000003      3500.471       2879.608       2780.666       3200.377       2022.090
 > ENSG00000000005         0.000          0.000          0.000          0.000          0.000
@@ -302,7 +302,7 @@ txi$abundance[1:5, 1:5]
 
 Example output:
 
->```r
+>```
 >                 1_ATCACG_L001 13_AGTCAA_L001 17_ATCACG_L002 21_ACAGTG_L002 25_GATCAG_L002
 > ENSG00000000003    183.446388     126.629907     160.899071     154.345210     106.109780
 > ENSG00000000005      0.000000       0.000000       0.000000       0.000000       0.000000
