@@ -1,7 +1,26 @@
 # tximport
 
-
 _You can read more about how to use these instructions, including the `<YOUR USER NAME>` notation, in [this section of the fastp and Salmon instructions.](https://github.com/jaclyn-taroni/2021-mdibl-fair/blob/main/instruction-material/bulk-rnaseq/01-fastp-salmon.md#how-to-use-these-directions)_
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+  - [Cooking show magic 🍳](#cooking-show-magic-)
+  - [Running tximport](#running-tximport)
+    - [Using `run-tximport.R`](#using-run-tximportr)
+    - [How `run-tximport.R` works](#how-run-tximportr-works)
+      - [Required libraries](#required-libraries)
+      - [Command line options](#command-line-options)
+      - [Files and directories](#files-and-directories)
+      - [tximport](#tximport-1)
+  - [Reading the tximport output into RStudio](#reading-the-tximport-output-into-rstudio)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+By design, we hide the contents of the [How `run-tximport.R` works](#how-run-tximportr-works) section to allow folks to concentrate on the steps to be taken during synchronous instruction.
+This section explains what the code in `run-tximport.R` is doing and is intended to be helpful when revisiting this material.
+
 
 ## Cooking show magic 🍳
 
