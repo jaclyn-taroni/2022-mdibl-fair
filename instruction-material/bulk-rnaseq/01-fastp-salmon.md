@@ -211,11 +211,11 @@ You should expect to see output like the following in the command line when it s
 
 > ```
 > Detecting adapter sequence for read1...
-> \>Illumina TruSeq Adapter Read 1
+> >Illumina TruSeq Adapter Read 1
 > AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
 >
 > Detecting adapter sequence for read2...
-> \>Illumina TruSeq Adapter Read 2
+> >Illumina TruSeq Adapter Read 2
 > AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 > ```
 
