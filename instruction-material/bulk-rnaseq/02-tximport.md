@@ -158,7 +158,7 @@ salmon_files <- list.files(path = "/data",
                            
 ```
 
-Then, just in case there are any _other_ `quant.sf` files on the server in `/data`, we'll filter to only the 
+Then, just in case there are any _other_ `quant.sf` files on the server in `/data`, we'll filter to only the relevant files by detecting the pattern `workshop-*` in the file paths (`*` is a wildcard).
 
 ```r
 
