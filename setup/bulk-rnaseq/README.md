@@ -26,3 +26,11 @@ We run FastQC, fastp, Salmon, and MultiQC via Snakemake:
 ```
 snakemake --cores 1
 ```
+
+#### tximport
+
+The final processing step is `tximport`, which can be run with the following:
+
+```
+Rscript scripts/run-tximport.R
+```
