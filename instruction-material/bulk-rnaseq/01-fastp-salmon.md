@@ -216,7 +216,7 @@ You should expect to see output like the following in the command line when it s
 >
 > Detecting adapter sequence for read2...<br>
 > \>Illumina TruSeq Adapter Read 2<br>
-AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+> AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 > ```
 
 It will also report a lot of the QC information as a message when it finishes, too.
