@@ -210,12 +210,12 @@ Including the sample name in the filenames again may help us with project organi
 You should expect to see output like the following in the command line when it starts:
 
 > ```
-> Detecting adapter sequence for read1...<br>
-> \>Illumina TruSeq Adapter Read 1<br>
+> Detecting adapter sequence for read1...
+> \>Illumina TruSeq Adapter Read 1
 > AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
 >
-> Detecting adapter sequence for read2...<br>
-> \>Illumina TruSeq Adapter Read 2<br>
+> Detecting adapter sequence for read2...
+> \>Illumina TruSeq Adapter Read 2
 > AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 > ```
 
