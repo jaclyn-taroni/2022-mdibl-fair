@@ -251,12 +251,67 @@ RDS is a special file format that we will cover in more detail below!
 </details>
 
 
-## Read into RStudio
+## Reading the tximport output into RStudio
 
- (don't forget to remove the `<` and `>` in your replacement):
+Once we have the `goodale_data_tximport.RDS` file locally, we can read it into RStudio on our own computers.
+
+The `.RDS` file extension indicates that this file is a single R object that we've stored and can restore by reading it into R and even use a different name ([ref](https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html)).
+This can be handy when we want to save an entire "specialized" R object, instead of flat tabular data – `tximport()` returns a _list_, rather than a matrix or data frame that we could easily save as a TSV or CSV file.
+
+**Open up RStudio on your computer, and enter the following command in the [R Console](https://raw.githubusercontent.com/AlexsLemonade/training-modules/master/intro-to-R-tidyverse/screenshots/01-console.png)**; `<SOMEWHERE ON YOUR COMPUTER YOU WANT TO COPY THIS FILE TO>` should match the same location you used above with `scp` and don't forget to remove the `<` and `>` in your replacement!
 
 ```r
 txi <- readr::read_rds("<SOMEWHERE ON YOUR COMPUTER YOU WANT TO COPY THIS FILE TO>")
 ```
 
+**You can check what kind of object `txi` is with the following** (this, and all the commands that follow it, should be pasted or typed into the R Console):
 
+```r
+class(txi)
+```
+
+**Let's take a look at the first five rows and first five columns of the `counts` element of the `txi` object.**
+This will be the estimated counts from Salmon.
+We use the `$` operator extract this element of the list by _name_.
+(You can use `help("$")` in the R Console to learn more!)
+
+```r
+txi$counts[1:5, 1:5]
+```
+
+Here's what it looks like (numbers may vary _slightly_):
+
+> ```r
+>                 1_ATCACG_L001 13_AGTCAA_L001 17_ATCACG_L002 21_ACAGTG_L002 25_GATCAG_L002
+> ENSG00000000003      3500.471       2879.608       2780.666       3200.377       2022.090
+> ENSG00000000005         0.000          0.000          0.000          0.000          0.000
+> ENSG00000000419       960.999        815.333        733.287        714.611        720.959
+> ENSG00000000457       531.009        422.673        458.774        383.644        371.547
+> ENSG00000000460       104.000         95.296        100.404         93.959        100.000
+> ```
+
+Our row names are human Ensembl gene IDs, which we can tell because they begin with `ENSG`.
+This also tells us we have successfully summarized this data to the gene-level!
+You can also see that these are not integers (as you may be conditioned to expect) but are instead decimal values, which stems from the procedure Salmon uses estimate the counts ([ref](https://github.com/COMBINE-lab/salmon/issues/437#issuecomment-751190682)).
+
+**Let's do the same thing for the `abundance` element, which will be gene-level TPM:**
+
+```r
+txi$abundance[1:5, 1:5]
+```
+
+Example output:
+
+>```r
+>                 1_ATCACG_L001 13_AGTCAA_L001 17_ATCACG_L002 21_ACAGTG_L002 25_GATCAG_L002
+> ENSG00000000003    183.446388     126.629907     160.899071     154.345210     106.109780
+> ENSG00000000005      0.000000       0.000000       0.000000       0.000000       0.000000
+> ENSG00000000419    103.741267      73.789858      86.350549      69.230532      77.623139
+> ENSG00000000457     11.453205       7.786352      11.667542       8.989396      10.214488
+> ENSG00000000460      3.724108       3.127855       4.136371       3.168573       3.654559
+> ```
+
+The final elements in the `txi` list are the `length` matrix, which contains the effective lengths and can be used to generate an offset matrix for downstream gene-level differential expression analyses ([`tximport` vignette](https://bioconductor.org/packages/devel/bioc/vignettes/tximport/inst/doc/tximport.html#Salmon)), and `countsFromAbundance` which stores what  we used for the `countsFromAbundance` argument when we called `tximport()`.
+
+
+**We will use the `txi` data in the edgeR modules downstream, so leave RStudio open with `txi` loaded in!**
