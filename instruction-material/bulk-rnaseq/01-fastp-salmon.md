@@ -423,7 +423,7 @@ You should see folders, JSON files, and a file called `quant.sf`.
 >```
 
 `quant.sf` is the quantification output from Salmon, which we'll use in our next step (`tximport`) and we will examine in the next step.
-If you don't see `quant.sf`, but you do see some of the other 
+If you don't see `quant.sf`, but you do see some of the other files or folders, that suggests that Salmon did not run successfully.
 
 ## Examining the output
 
@@ -432,7 +432,7 @@ _Adapted in part from [this lession](https://hbctraining.github.io/Intro-to-rnas
 In this section, we'll use a tool called `less` to examine some of the output from fastp and Salmon via the command line.
 [`less`](https://en.wikipedia.org/wiki/Less_(Unix)) can be used to view (but not edit!) the context of a text file from the command line.
 
-First, let's look at some of the QC information from fastp:
+**First, let's look at some of the QC information from fastp:**
 
 ```
 less QC/fastp_reports/<YOUR SAMPLE>_fastp.json
@@ -448,7 +448,7 @@ You can see an example HTML fastp report for one of the samples in this experime
 
 If the vast majority of your reads were filtered out via this process, that would be cause for concern!
 
-Now, use the following to examine the quantification file from Salmon:
+**Now, use the following to examine the quantification file from Salmon:**
 
 ```
 less salmon/<YOUR SAMPLE>/quant.sf
@@ -465,6 +465,20 @@ Check out [_RPKM, FPKM, and TPM, clearly explained_ from StatsQuest](https://www
 * Estimated number of reads that map to each transcript that was quantified.
 
 Again, when you're ready to stop scrolling through the `quant.sf` file, type `q`!
+
+
+**Finally, let's look at some of the metadata output by Salmon with the following command:**
+
+```
+less salmon/<YOUR SAMPLE>/aux_info/meta_info.json
+```
+
+Using your down arrow key, scroll down to a field called `"percent_mapped"` – what does it say for your sample?
+
+What constitutes a good or even acceptable percentage of mapped reads for an RNA-seq sample depends on who you ask, but I've heard folks say about 70% as a rule of thumb.
+You're only looking at your own sample at the moment, but often in the context of an experiment you'll want to see if there are some samples with a much lower mapping rate that you may want to exclude from downstream analysis.
+
+Type `q` when you're done!
 
 
 ## Worked example
@@ -504,6 +518,19 @@ salmon quant \
   --validateMappings \
   --gcBias \
   --seqBias
+
+```
+
+```
+less QC/fastp_reports/5_ACAGTG_L001_fastp.json
+```
+
+```
+less salmon/5_ACAGTG_L001/quant.sf
+```
+
+```
+less salmon/5_ACAGTG_L001/aux_info/meta_info.json
 ```
 
 </details>
