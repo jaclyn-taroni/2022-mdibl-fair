@@ -12,4 +12,4 @@ salmon/
 # Also does not ignore the text files for multiqc
 QC/**/*.json
 QC/**/*.zip
-
+QC/**/*.log
