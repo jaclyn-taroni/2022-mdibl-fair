@@ -329,7 +329,7 @@ It should be noted that this is only appropriate for use with paired-end reads, 
 With this option enabled, Salmon will attempt to correct for the bias that occurs when using random hexamer priming (preferential sequencing of reads when certain motifs appear at the beginning); many RNA-seq experiments do use random hexamer priming!
 
 We know that this experiment shows evidence of random hexamer priming by looking at FastQC reports ([example](https://jaclyn-taroni.github.io/2021-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports/5_ACAGTG_L001_R1_combined_fastqc.html#M4)).
-We don't cover FastQC here, but you can read more about it [in reference material we've prepared for you](https://jaclyn-taroni.github.io/2021-mdibl-fair/instruction-material/bulk-rnaseq/00-reference-material.md#fastqc).
+We don't cover FastQC here, but you can read more about it [in reference material we've prepared for you](https://jaclyn-taroni.github.io/2021-mdibl-fair/instruction-material/bulk-rnaseq/00-reference-material#fastqc).
 
 You can read more about biases that arise from random hexamer priming in [Hansen *et al.* (2010)](https://doi.org/10.1093/nar/gkq224).
 
