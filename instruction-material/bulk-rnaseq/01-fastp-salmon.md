@@ -1,5 +1,45 @@
 # fastp and Salmon
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+
+- [Introduction to the exercise](#introduction-to-the-exercise)
+    - [How to use these directions](#how-to-use-these-directions)
+      - [Sample identifiers](#sample-identifiers)
+      - [Commands](#commands)
+      - [Documenting expected output](#documenting-expected-output)
+      - [Using a text editor](#using-a-text-editor)
+- [Setting up](#setting-up)
+- [Preprocessing with fastp](#preprocessing-with-fastp)
+    - [fastp arguments and options](#fastp-arguments-and-options)
+      - [Input: `-in1` and `-in2`](#input--in1-and--in2)
+      - [fastq output: `-out1` and `-out2`](#fastq-output--out1-and--out2)
+      - [`--qualified_quality_phred`](#--qualified_quality_phred)
+      - [`--length_required`](#--length_required)
+      - [`--detect_adapter_for_pe`](#--detect_adapter_for_pe)
+      - [`--report_title`](#--report_title)
+      - [`--json` and `--html`](#--json-and---html)
+    - [What to expect when `fastp` is running](#what-to-expect-when-fastp-is-running)
+    - [What to expect when `fastp` has finished running](#what-to-expect-when-fastp-has-finished-running)
+- [Quantifcation with Salmon](#quantifcation-with-salmon)
+    - [Salmon arguments and options](#salmon-arguments-and-options)
+      - [Transcriptome index: `-i`](#transcriptome-index--i)
+      - [`-l`](#-l)
+      - [Input: `-1` and `-2`](#input--1-and--2)
+      - [`-o`](#-o)
+      - [`--threads`](#--threads)
+      - [`--validateMappings`](#--validatemappings)
+      - [`--gcBias`](#--gcbias)
+      - [`--seqBias`](#--seqbias)
+    - [What to expect when `salmon quant` is running](#what-to-expect-when-salmon-quant-is-running)
+    - [What to expect when `salmon quant` has finished running](#what-to-expect-when-salmon-quant-has-finished-running)
+- [Examining the output](#examining-the-output)
+- [Worked example](#worked-example)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Introduction to the exercise
 
 You will each preprocess and quantify a single paired-end RNA-seq sample with fastp and Salmon.
@@ -401,7 +441,7 @@ less QC/fastp_reports/<YOUR SAMPLE>_fastp.json
 You can use your up and down arrow keys to scroll through this file.
 Type `q` to quit `less`!
 
-Of particular interest are the `summary`, `filtering_result`, and `duplication` fields, which can give you an idea of how much preprocessing (e.g., filtering, trimming) occurred. 
+Of particular interest are the `summary`, `filtering_result`, and `duplication` fields, which can give you an idea of how much preprocessing (e.g., filtering, trimming) occurred and the sequence duplication rate (e.g., PCR duplicates or even short or very highly expressed transcripts; see [_Should I remove PCR duplicates from my RNA-seq data?_ from the UC Davis Genome Center](https://dnatech.genomecenter.ucdavis.edu/faqs/should-i-remove-pcr-duplicates-from-my-rna-seq-data/)), respectively.
 
 fastp also outputs HTML reports. 
 You can see an example HTML fastp report for one of the samples in this experiment here:  <https://jaclyn-taroni.github.io/2021-mdibl-fair/setup/bulk-rnaseq/QC/fastp_reports/5_ACAGTG_L001_fastp.html>
