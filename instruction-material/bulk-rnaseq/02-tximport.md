@@ -65,7 +65,7 @@ Rscript /data/scripts/run-tximport.R \
 ### How `run-tximport.R` works
 
 <details>
-<summary> _**Expand this section for a walk through of what the different sections of the `run-tximport.R` script are accomplishing**_ 🚀 </summary>
+<summary> **_Expand this section for a walk through of what the different sections of the `run-tximport.R` script are accomplishing_** 🚀 </summary>
 
 Let's walk through what the different sections of the `run-tximport.R` script are accomplishing (you can view this script on GitHub [here](https://github.com/jaclyn-taroni/2021-mdibl-fair/tree/main/instruction-material/bulk-rnaseq/scripts-for-server/run-tximport.R)).
 
