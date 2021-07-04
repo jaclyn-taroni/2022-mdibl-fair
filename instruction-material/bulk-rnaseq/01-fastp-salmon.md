@@ -341,17 +341,17 @@ You should expect to see output like the following in the command line when it s
 
 >```
 >### salmon (selective-alignment-based) v1.5.1
-### [ program ] => salmon 
-### [ command ] => quant 
-### [ index ] => { /data/index/Homo_sapiens/salmon_index }
-### [ libType ] => { A }
-### [ mates1 ] => { trimmed/<YOUR SAMPLE>_R1_combined.fastq.gz }
-### [ mates2 ] => { trimmed/<YOUR SAMPLE>_R2_combined.fastq.gz }
-### [ output ] => { salmon/<YOUR SAMPLE> }
-### [ threads ] => { 4 }
-### [ validateMappings ] => { }
-### [ gcBias ] => { }
-### [ seqBias ] => { }
+>### [ program ] => salmon 
+>### [ command ] => quant 
+>### [ index ] => { /data/index/Homo_sapiens/salmon_index }
+>### [ libType ] => { A }
+>### [ mates1 ] => { trimmed/<YOUR SAMPLE>_R1_combined.fastq.gz }
+>### [ mates2 ] => { trimmed/<YOUR SAMPLE>_R2_combined.fastq.gz }
+>### [ output ] => { salmon/<YOUR SAMPLE> }
+>### [ threads ] => { 4 }
+>### [ validateMappings ] => { }
+>### [ gcBias ] => { }
+>### [ seqBias ] => { }
 >```
 
 `salmon quant` is pretty verbose and will keep updating you on what it's doing with messages!
