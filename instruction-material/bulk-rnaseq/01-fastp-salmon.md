@@ -43,7 +43,7 @@
 ## Introduction to the exercise
 
 You will each preprocess and quantify a single paired-end RNA-seq sample with fastp and Salmon.
-Your own "personal" FASTQ files can be found on the server in the `/data/<your user name>/raw` directory.
+Your own "personal" FASTQ files can be found on the server in the `/data/<YOUR USER NAME>/raw` directory.
 We will use everyone's Salmon output as input into an R package called `tximport`.
 
 
@@ -215,7 +215,9 @@ And in the event that you accidentally do modify the originals, you know exactly
 Q20 (a Phred score of 20) represents a 1 in 100 chance that the base call is incorrect and is often used as the cutoff for good quality calls.
 Because of how the Phred score is calculated, the error rate increases quite rapidly as you head towards zero after Q20 (see [this post on Phred scores from the GATK Team](https://gatk.broadinstitute.org/hc/en-us/articles/360035531872-Phred-scaled-quality-scores)).
 
-Here we're using `--qualified_quality_phred 15` to stick with the default setting, which means scores >= 15 are considered "qualified."
+Here we're using `--qualified_quality_phred 15` to stick with the default setting, which means scores >= 15 are considered "qualified." 
+If more than 40% of bases (we could specify a higher or lower threshold with `-u`) in a read have a Phred score below the qualified score, the read will be filtered out.
+Bases can also be uncalled (e.g., `N`); fastp will filter out reads/pairs with 5 or more uncalled reads (we can adjust this threshold with `-n`).
 
 _Quality trimming_, in contrast to filtering, refers to removing low quality base calls from the (typically 3') end of reads.
 A recent paper from the Salmon authors ([Srivastava _et al._ 2020](https://doi.org/10.1186/s13059-020-02151-8)) notes that trimming did not affect mapping rates from random publicly available human bulk (paired-end) RNA-seq samples (they used [TrimGalore](https://github.com/FelixKrueger/TrimGalore)).
@@ -226,6 +228,17 @@ We are not using it here!
 
 Trimming reads may result in short reads, which may affect gene expression estimates ([Williams *et al.* 2016.](https://doi.org/10.1186/s12859-016-0956-2)).
 Using `--length_required 15` means that reads shorter than 15bp will be discarded (and is the default setting).
+
+In practice, any read that is shorter than the _k_ size used to build the Salmon index will not be quantified (more on that [below](#transcriptome-index--i)).
+You may see a warning like the following from Salmon when you run it:
+
+>```
+> [2021-07-03 20:38:30.829] [jointLog] [warning] 0.00272915% of fragments were shorter than the k used to build the index.
+> If this fraction is too large, consider re-building the index with a smaller k.
+> The minimum read size found was 15.
+>```
+
+Note that this minimum read size is consistent with what we would expect from the fastp processed data.
 
 #### `--detect_adapter_for_pe`
 
