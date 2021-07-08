@@ -2,7 +2,7 @@
 
 These materials are for instruction as part of MDIBL's 2021 Reproducible and FAIR Bioinformatics Analysis of Omics Data course.
 
-They are largely adapted from [Alex's Lemonade Stand Foundation](https://www.alexslemonade.org/) [Childhood Cancer Data Lab](https://www.ccdatalab.org/) [training materials](https://github.com/AlexsLemonade/training-modules), with some material adapted from [Harvard Chan Bioinformatics Core](http://bioinformatics.sph.harvard.edu/) lessons.
+They are adapted from [Alex's Lemonade Stand Foundation](https://www.alexslemonade.org/) [Childhood Cancer Data Lab](https://www.ccdatalab.org/) [training materials](https://github.com/AlexsLemonade/training-modules), [Harvard Chan Bioinformatics Core](http://bioinformatics.sph.harvard.edu/) lessons and [Penn GCB 535 materials](https://github.com/greenelab/GCB535).
 (Sources used will be indicated in individual sections of instruction material.)
 
 

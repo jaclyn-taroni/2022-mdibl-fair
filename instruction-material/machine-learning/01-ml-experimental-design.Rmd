@@ -1,0 +1,608 @@
+---
+title: "Machine Learning: Intro to Experimental Design"
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+date: 2021
+---
+
+This notebook is designed to be self-guided, as your instructor is concerned about access to a stable internet connection at the time of instruction.
+To guard against potential technical mishaps, we include links to short lecture videos throughout as well as explanatory text.
+
+The BRCA classifier has been adapted from [Penn GCB 535](https://github.com/greenelab/GCB535) machine learning material; many of the videos we link to are from this course as well.
+
+## Set up
+
+```{r}
+if (!("magrittr" %in% installed.packages())) {
+  install.packages("tidyverse")  # We'll want to make sure dplyr is installed, too
+}
+library(magrittr)
+
+if (!("caret" %in% installed.packages())) {
+  install.packages("caret")
+}
+library(caret)
+
+if (!("kernlab" %in% installed.packages())) {
+  install.packages("kernlab")
+}
+```
+
+## Evaluating model performance: metrics
+
+Let's start by looking at the output labels for 2 models that were trained to predict case vs. control.
+The table we'll read in also includes the true labels.
+
+```{r}
+# Read in the labels for the models and call it `labels_df`
+labels_df <- readr::read_tsv(file.path("results", 
+                                       "case-vs-control",
+                                       "case_control_labels.tsv"))
+```
+
+Let's look at the first few rows of `labels_df` and describe what each of the columns mean.
+
+```{r}
+head(labels_df)
+```
+
+The columns for this data frame are:
+
+* `sample_id` - A+ column name, very self-explanatory/descriptive
+* `class_label` - the **true** class labels that we know from some external source
+* `predicted_label_model1` - the **predicted** class labels from our _first model_
+* `predicted_label_model2` - the **predicted** class labels from our _second model_
+
+Let's see what the values exist for the true class labels in `class_label`
+
+```{r}
+unique(labels_df$class_label)
+```
+
+Both cases and controls are represented, as we might expect since I told you we trained two models to distinguish between cases vs. controls.
+
+Now that we have predictions from the two models, we need to figure out which one is better!
+
+**Overall accuracy** is calculated by dividing the number of correctly classified samples by the total number of of samples.
+Overall accuracy is a popular metric for evaluating performance.
+
+Let's calculate overall accuracy for both of our models.
+First, we should count the number of correctly classified samples for both of our models.
+The number of correctly classified samples will be the number of times the value in the predicted class column for that model is the same as the value `class_label` column.
+
+We can use `apply()` with the `MARGIN` set to `1` (which means apply the function to the _rows_) to apply a custom function that checks for agreement between the labels with the `==` operator.
+
+```{r}
+# This will return a logical vector that indicates whether (TRUE) or not (FALSE)
+# The predicted label for a sample from model 1 is the same as the actual class 
+# label
+model1_correct <- apply(labels_df, 1, 
+                        function(x) x["predicted_label_model1"] == x["class_label"])
+
+# Take a look at the first 6 values for this vector
+head(model1_correct)
+```
+
+Because `model1_correct` is a logical vector, we can _count_ how many times something is correctly labeled by using `sum()`; `sum()` will treat `TRUE` values as 1s and `FALSE` values as 0s.
+
+Let's take a look at how that works using a logical vector of length 5 that we construct with `c()` to get a better idea of how this works.
+
+```{r}
+sum(c(TRUE, FALSE, TRUE, TRUE, FALSE))
+```
+
+Okay, let's use `sum()` to count how many samples were correctly classified by model 1.
+
+```{r}
+model1_correct_count <- sum(model1_correct)
+```
+
+And then we need to divide this by the total number of samples (which will be the number of rows in `labels_df`) and multiply by 100 to get accuracy represented as a percentage.
+
+```{r}
+(model1_correct_count / nrow(labels_df)) * 100
+```
+
+Let's calculate overall accuracy for model 2.
+
+```{r}
+model2_correct <- apply(labels_df, 1, 
+                       function(x) x["predicted_label_model2"] == x["class_label"])
+(sum(model2_correct) / nrow(labels_df)) * 100
+```
+
+**Which model has the better performance?**
+
+Before you answer definitively, you should know that overall accuracy can sometimes obscure the whole picture.
+
+We calculated accuracy without really looking at the predicted labels themselves, so let's take a moment to do that now!
+We can use `table()` to count how many times each value (`case` or `control`) appears in the predicted label columns.
+
+Starting with model 1...
+
+```{r}
+table(labels_df$predicted_label_model1)
+```
+
+Oh no! That means this model only ever predicts that a sample's label is `case`.
+That's probably not a very helpful model, but it does have decent accuracy. 
+How can that be?
+
+Let's use `table()` again, this time to look at the true labels.
+
+```{r}
+table(labels_df$class_label)
+```
+
+There are _way more_ samples with the `case` label than the `control` label.
+This is a problem that's known as **class imbalance** and when it is present in a dataset, overall accuracy can sometimes give us an overly optimistic view of the performance of the model.
+
+Just by always predicting `case`, model 1 achieves 85% accuracy.
+
+Let's use `table()` again, but this time we'll include the true labels and the model 2 predicted labels to create a 2x2 table.
+
+```{r}
+table(labels_df$class_label,
+      labels_df$predicted_label_model2)
+```
+
+Even though model 2 has lower accuracy (82%), it might actually have better _performance_ when we take into account our goals (distinguishing case vs. control)!
+
+Luckily, there are other statistics that can tell us about model performance which may be more appropriate in this case.
+
+There is a package called [`caret`](https://topepo.github.io/caret/), which has lots of great machine learning functionality, that we can use to calculate other metrics and create what is known as a [confusion matrix](https://en.wikipedia.org/wiki/Confusion_matrix). 
+
+```{r}
+# confusionMatrix() wants factors
+# data should be "a factor of predicted classes (for the default method)"
+# and reference should be "a factor of classes to be used as the true results"
+confusionMatrix(data = factor(labels_df$predicted_label_model1,
+                              levels = c("case", "control")),
+                reference = factor(labels_df$class_label,
+                                   levels = c("case", "control")))
+```
+
+We can see this returns many more statistics than accuracy alone (where `case` is treated as the positive class), including:
+
+* `Sensitivity` (also called the True Positive Rate or recall) = true positives / (true positives + false negatives)
+* `Specificity` (also called the True Negative Rate) = true negatives / (false positives + true negatives)
+* `Pos Pred Value` stands for positive predictive value (also called precision) = true positives / (true positives + false positives)
+* `Kappa` (also known as Cohen's kappa) is an indication of how your model is performing relative to a classifier that guesses based on the frequency of each class and is always less than or equal to 1 ([ref](https://thedatascientist.com/performance-measures-cohens-kappa-statistic/)).
+
+(Some of these are a refresher from the earlier exercise!
+Lots of great information in the `confusionMatrix()` docs [here](https://rdrr.io/cran/caret/man/confusionMatrix.html), too.)
+
+In this case, model 1 is not doing better than randomly guessing the class based on its frequency.
+
+Class imbalance [frequently comes up in applying ML to the biomedical domain](https://www.nature.com/articles/s41598-017-03011-5) and we'll take a second to mention that there's been [work on what plots to use in these cases](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118432), too.
+
+Okay, now let's look at the same metrics for our second model with `confusionMatrix()`.
+
+```{r}
+confusionMatrix(data = factor(labels_df$predicted_label_model2,
+                              levels = c("case", "control")),
+                reference = factor(labels_df$class_label,
+                                   levels = c("case", "control")))
+```
+
+We can see that kappa is considerably higher for the second model (0.44 vs. 0.00), but this value would not necessarily be considered good performance, either (more on that below).
+
+Which of these models are better is going to depend on the goal of the classifier!
+It is probably not very helpful to have a classifier that always predicts `case`.
+
+More generally, when setting up an experiment or approach, it's good to figure out what is most important to you: Is it most important to correctly identify positive cases? Are you very concerned about false negatives?
+A full discussion of all these metrics is beyond the scope of this session, but we hope you can appreciate that selecting a metric based on what you are hoping to accomplish is important!
+
+Let's remove these items from our global environment before we go onto the next section.
+
+```{r}
+rm(labels_df, model1_correct, model1_correct_count, model2_correct)
+```
+
+
+
+
+## Evaluating model performance: training/test split, cross validation, and independent validation sets
+
+_This material has been adapted from [Penn GCB 535](https://github.com/greenelab/GCB535) machine learning material._
+
+We will use prediction tumor vs. normal in a breast cancer (BRCA) gene expression data set as an example for some of the machine learning concepts (and how to implement them in R with `caret`) below.
+The first dataset we will be working with is data from the [METABRIC](https://www.mercuriolab.umassmed.edu/metabric) study.
+
+```{r}
+# This is a tab-delimited text file without a column name in the first column
+metabric_exprs_df <- readr::read_tsv(file.path("data",
+                                               "expression",
+                                               "METABRIC_dataset.pcl")) %>%
+  tibble::column_to_rownames("X1")
+```
+Gene expression data is typically stored with features as rows and samples as columns.
+Most machine learning packages will expect our observations/sames as columns and our features as rows.
+Let's transpose this expression matrix.
+
+```{r}
+t_metabric_exprs <- t(as.matrix(metabric_exprs_df))
+```
+
+Now we'll read in the METABRIC data labels.
+
+```{r}
+# This is a space-delimited text file with no header row
+metabric_meta_df <- readr::read_delim(file.path("data", 
+                                                "metadata",
+                                                "metabric_tumor_normal_label.txt"),
+                                      col_names = FALSE,
+                                      delim = " ") %>%
+  dplyr::rename(sample_id = X1, tumor_label = X2)
+```
+
+Before we use our labels, let's make sure our samples are in the same order.
+
+```{r}
+identical(metabric_meta_df$sample_id, rownames(t_metabric_exprs))
+```
+
+And what is the balance of classes?
+
+```{r}
+table(metabric_meta_df$tumor_label)
+```
+
+We have a class imbalance issue here!
+If we built a classifier that predicted Tumor 100% of the time, how would we do on accuracy?
+
+```{r}
+1992 / (144 + 1992)
+```
+
+Something to keep in mind as we go into the next section.
+
+
+### Support Vector Machines
+
+In the last exercise, you were introduced to tree models.
+Here we'll introduce another kind of supervised machine learning model: support vector machines (SVM).
+How these work is relatively intuitive.
+
+**Check out this video from Dr. Casey Greene on the subject: [_Support Vector Machines for GCB 535_](https://www.youtube.com/watch?v=EbVs31qq1Is)**
+
+We'll also quote [Wikipedia](https://en.wikipedia.org/wiki/Support-vector_machine) here for your convenience:
+
+> SVM maps training examples to points in space so as to maximise the width of the gap between the two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. 
+
+**And learn more about the C parameter that can be tuned for SVMs from Casey here: [_The C Parameter for Support Vector Machines - GCB 535_](https://www.youtube.com/watch?v=5oVQBF_p6kY)**
+
+
+### Training and test sets
+
+Once we train a supervised machine learning model, we often want to assess how it will perform on unseen data.
+If our model doesn't _generalize_ to unseen data, it's probably not very useful for us.
+When a model doesn't generalize, folks use the term "overfitting" -- the model is too well fit to the training data.
+That often manifests as very high performance on the training data and a considerable drop in performance on a test set.
+
+**Check out Casey's introduction to assessment here: [_GCB 535 - Introduction to the Assessment of Supervised Machine Learning Methods_](https://www.youtube.com/watch?v=s_qpzxbVViI)**
+
+Like we covered in the previous module, we can split our data into a training and test set.
+Our test set will be 20% of our data.
+
+```{r}
+# Set the seed for reproducibility - there is random sampling that takes place
+# in the next step!
+set.seed(2021)
+
+# Get the index of samples to include in the training sets
+train_index <- createDataPartition(y = metabric_meta_df$tumor_label,
+                                   p = 0.8, 
+                                   times = 1,
+                                   list = FALSE)
+
+# Split up the dataset into training and testing
+metabric_train <- t_metabric_exprs[train_index, ]
+metabric_test <- t_metabric_exprs[-train_index, ]
+```
+
+`createDataPartition()` takes class balance into account, which we can verify with `table()` and dividing by the number of samples in a set.
+
+Training:
+
+```{r}
+table(metabric_meta_df$tumor_label[train_index]) / length(train_index)
+```
+
+Test:
+
+```{r}
+table(metabric_meta_df$tumor_label[-train_index]) / (length(metabric_meta_df$tumor_label) - length(train_index))
+```
+
+Now we're ready to train our SVM, which we can do with `train()`!
+
+```{r}
+svm_result <- train(x = metabric_train,  # Transposed expression data - training only
+                    # Tumor v. normal - training only
+                    y = metabric_meta_df$tumor_label[train_index],
+                    # The type of classifier - SVM w/ linear kernel
+                    method = "svmLinear", 
+                    # This is telling train not to do any parameter tuning
+                    trControl = trainControl(method = "none",
+                                             returnData = FALSE))
+```
+
+We can learn a little bit more about this model by accessing `finalModel` by name.
+
+```{r}
+svm_result$finalModel
+```
+
+We're using the default setting for C here.
+We can see that we had a training error of `0`. 
+Error is (false positives + false negatives) / total samples. 
+
+Using `predict()` on an object returned by `train()` will allow us to extract predictions.
+
+```{r}
+# First few labels for our *training* data
+head(predict(svm_result, newdata = metabric_train))
+```
+
+And we can use `predict()` in conjunction with `confusionMatrix()` to look at _training_ performance beyond error.
+
+```{r}
+confusionMatrix(data = predict(svm_result, newdata = metabric_train),
+                reference = factor(metabric_meta_df$tumor_label[train_index]))
+```
+
+So, excellent performance on the training data - how does this model do on the unseen test data?
+We can use `predict()` and `confusionMatrix()` again to evaluate performance.
+
+```{r}
+confusionMatrix(data = predict(svm_result, newdata = metabric_test),
+                reference = factor(metabric_meta_df$tumor_label[-train_index]))
+```
+
+Quite good performance!
+No evidence of overfitting from the information we've gathered so far.
+
+#### Note on 'data leakage'
+
+In machine learning, we can often encounter a problem called [data leakage](https://machinelearningmastery.com/data-leakage-machine-learning/).
+This is when information from the test set or more generally from outside of the training set "leaks" into the model.
+Data leakage is a problem because it can give you an overly optimistic view of performance.
+
+One way that data leakage can happen is by transforming your dataset _all together_ (termed ["naive data preparation" in this post](https://machinelearningmastery.com/data-preparation-without-data-leakage/)) before we split into training and testing.
+
+**We** didn't do any transformation in this notebook, but let's take a look at the values in our training and test sets.
+
+Training first:
+
+```{r}
+plot(density(metabric_train))
+```
+
+And now our test set:
+
+```{r}
+plot(density(metabric_test))
+```
+
+We can see that our values are scaled between zero and one. 
+This data has undergone what is known as [min-max normalization or min-max scaling](https://towardsdatascience.com/everything-you-need-to-know-about-min-max-normalization-in-python-b79592732b79) and this happened _before_ we split into training and testing.
+
+A better approach probably would have been to split our data, perform the transformation to our training set (e.g., fit the transformation to our training set), apply the transformation to our test set, and then gone about our business of training and evaluation.
+You can read a bit more about how to do this with `caret` [here](https://topepo.github.io/caret/pre-processing.html#the-preprocess-function).
+
+When we do cross-validation, which we'll cover below, data preparation should be done on training and testing as described above but once for each training and test set, separately ([ref](https://machinelearningmastery.com/data-preparation-without-data-leakage/)).
+
+We can still use these data to illustrate some of these concepts (and how to implement them with `caret`!), but it is something to be aware of when it comes to your own work and what you encounter in the literature.
+
+### k-fold Cross Validation
+
+**Check out Casey's video on cross-validation: [_GCB 535 - Assessing model performance through cross validation._](https://www.youtube.com/watch?v=rMZYrneij-E)**
+
+You may want also to check out StatQuest video [_Machine Learning Fundamentals: Cross Validation_](https://www.youtube.com/watch?v=fSytzGwwBVw) from Josh Starmer.
+
+As mentioned in Casey's video, an advantage of cross-validation is that we train and test on all the data to get an idea of how the model with generalize.
+We can set up cross-validation in `caret` with `trainControl()`.
+
+```{r}
+# Set up cross-validation
+cv_control <- trainControl(method = "cv",
+                           number = 5,  # 5-fold cross-validation
+                           returnData = FALSE)
+
+# Run 5-fold cross-valdiation
+svm_cv_results <- train(x = t_metabric_exprs,  # All expression data
+                        y = metabric_meta_df$tumor_label,  # All labels
+                        # The type of classifier
+                        method = "svmLinear", 
+                        # Use the default value for C
+                        tuneGrid = data.frame(.C = 1),  
+                        # 5-fold CV as specified with trainControl()
+                        trControl = cv_control,
+                        # We have a class imbalance problem!
+                        # Use Kappa instead of accuracy.
+                        metric = "Kappa")  
+```
+
+And now some information about what we did, just by printing `svm_cv_results`.
+
+```{r}
+svm_cv_results
+```
+The `finalModel` in this context will be the model with the largest kappa value ([ref](https://topepo.github.io/caret/model-training-and-tuning.html#choosing-the-final-model)). 
+We can pass `svm_cv_results` to `predict()` and it will use the final model for those predictions ([ref](https://topepo.github.io/caret/model-training-and-tuning.html#extracting-predictions-and-class-probabilities)).
+
+_Side note: you can also do something called [repeated k-fold cross-validation](https://machinelearningmastery.com/repeated-k-fold-cross-validation-with-python/), which is multiple runs of k-fold cross-validation, by changing a few arguments to `trainControl()`._
+
+
+### Independent validation set
+
+We've demonstrated how to split into training and testing with `caret` and how to perform 5-fold cross-validation.
+Ideally, if we want to test that our models are generalizable, we'd want to have an independent validation set.
+In this case, we have a BRCA set from TCGA available so let's read it in and get it ready.
+
+```{r}
+# A tab-delimited file without a column name in the first column
+tcga_exprs_df <- readr::read_tsv(file.path("data", 
+                                           "expression", 
+                                           "TCGA_dataset.pcl")) %>%
+  tibble::column_to_rownames("X1")
+
+# Transpose the matrix so samples are rows and genes are columns
+t_tcga_exprs <- t(as.matrix(tcga_exprs_df))
+
+# Read in the metadata
+tcga_meta_df <- readr::read_tsv(file.path("data", 
+                                          "metadata", 
+                                          "TCGA_subtype_label.txt"))
+```
+
+Check if the samples are in the same order in our expression data and the labels.
+
+```{r}
+identical(tcga_meta_df$Sample, rownames(t_tcga_exprs))
+```
+
+Nope. Okay, let's reorder the expression matrix using the column with sample IDs in the metadata.
+
+```{r}
+t_tcga_exprs <- t_tcga_exprs[tcga_meta_df$Sample, ]
+```
+
+Now check that the order is the same again.
+
+```{r}
+identical(tcga_meta_df$Sample, rownames(t_tcga_exprs))
+```
+
+What do the labels themselves look like?
+
+```{r}
+table(tcga_meta_df$Type)
+```
+
+When we go to test performance, we'll want to make sure that the levels of `Type` are consistent with what the model outputs.
+
+Let's create a new variable (column) called `tumor_labels` with `dplyr::mutate()` and `dplyr::case_when()`.
+This course has not covered [the tidyverse](https://www.tidyverse.org/), so don't worry about how this code works so much -- focus on the comments about what it's doing!
+
+```{r}
+tcga_meta_df <- tcga_meta_df %>% 
+  dplyr::mutate(tumor_labels = dplyr::case_when(
+    # When type is "metastatic" or "tumor", set `tumor_labels` value to "Tumor"
+    Type %in% c("metastatic", "tumor") ~ "Tumor",
+    # Otherwise, set it to normal
+    TRUE ~ "Normal"
+  ))
+```
+
+Based on the logic above, we'd expect 22 (e.g., equal to the number of tumor-adjacent normal samples) `Normal` samples.
+
+```{r}
+table(tcga_meta_df$tumor_labels)
+```
+
+Finally, we'll want to check that our features (rows, which are genes) are in the same order between the METABRIC data and the TCGA data.
+
+```{r}
+identical(colnames(t_metabric_exprs), colnames(t_tcga_exprs))
+```
+
+#### Assessing performance on TCGA data
+
+To test performance, we first need to obtain the predicted labels for the TCGA data.
+We'll assess the final model from cross-validation here by passing `svm_cv_result` to `predict()`.
+
+```{r}
+tcga_predicted_labels <- predict(svm_cv_results, newdata = t_tcga_exprs)
+```
+
+And now to get our metrics with `confusionMatrix()`.
+
+```{r}
+confusionMatrix(data = tcga_predicted_labels,
+                reference = factor(tcga_meta_df$tumor_labels))
+```
+
+Still pretty good accuracy, but since we have a class imbalance issue here we might want to look at kappa instead if we were to pick a single metric.
+
+Kappa values interpretation as originally laid out in n Landis & Koch (1977) (and via [this post](https://towardsdatascience.com/interpretation-of-kappa-values-2acd1ca7b18f)):
+
+> Kappa value interpretation:
+> <0 No agreement
+> 0 — .20 Slight
+> .21 — .40 Fair
+> .41 — .60 Moderate
+> .61 — .80 Substantial
+> .81–1.0 Perfect
+
+Using this scale, we see moderate performance.
+One thing to consider is that tumor-adjacent normal in TCGA might not be the same as a normal sample in METABRIC!
+
+## Parting thoughts on some additional "advanced" topics
+
+### Thoughts on tuning C
+
+It is not uncommon for machine learning models to have some set of parameters we'd like to "tune."
+For SVM, the C parameter is something we might like to select some best value for.
+(Here's the link again for Casey's video on the C parameter: [_The C Parameter for Support Vector Machines - GCB 535_](https://www.youtube.com/watch?v=5oVQBF_p6kY))
+
+When we perform parameter selection, we'd like to guard against overfitting and/or, if we're making a comparison between our new method and methods where we don't tune, that comparisons between methods are fair.
+If we were to tune parameters and test on the same set of data, this would be a form of data leakage ([ref](https://weina.me/nested-cross-validation/)).
+
+One popular way to do parameter tuning is to use an approach called nested cross-validation, which you can see explained by Cynthia Rudin in this video [_Nested Cross Validation_](https://www.youtube.com/watch?v=az60jS7MQhU) (uses 10-fold cross-validation) or in a visualization in [this post](https://weina.me/nested-cross-validation/) from Weina Jin, MD.
+
+The `caret` author recommends that we split into training and testing datasets and perform tuning on the training set ([ref](https://stats.stackexchange.com/questions/378426/parameter-tuning-with-vs-without-nested-cross-validation)).
+
+The tuning process works like this in `caret`  ([ref](https://topepo.github.io/caret/model-training-and-tuning.html#model-training-and-parameter-tuning)):
+
+![](https://topepo.github.io/caret/premade/TrainAlgo.png)
+
+Here's how we use `train()` for tuning, just in our training set:
+
+```{r}
+svm_tuning_cv_results <- train(x = metabric_train, 
+                               y = metabric_meta_df$tumor_label[train_index], 
+                               method = "svmLinear", 
+                               # Values to try for C
+                               tuneGrid = data.frame(C = c(0.001, 
+                                                           0.1, 
+                                                           1, 
+                                                           10, 
+                                                           100, 
+                                                           1000)),
+                               trControl =trainControl(method = "repeatedcv",
+                                                       number = 5,  # 5-fold cross-validation
+                                                       repeats = 5,  # 5x repeats
+                                                       returnData = FALSE),
+                               metric = "Kappa")
+
+svm_tuning_cv_results
+```
+
+This suggests that our C parameter does not matter _much_ in this particular case.
+We can also use `plot()` to examine the relationship between performance and the tuning parameters:
+
+```{r}
+plot(svm_tuning_cv_results)
+```
+
+We could then evaluate using our test dataset.
+
+### Regularization
+
+Another way to avoid overfitting is to use something called regularization.
+We won't discuss in any detail here, but will instead link to some videos from StatQuest if you're interested in learning more!
+
+* [_Regularization Part 1: Ridge (L2) Regression_](https://www.youtube.com/watch?v=Q81RR3yKn30)
+* [_Regularization Part 2: Lasso (L1) Regression_](https://www.youtube.com/watch?v=NGf0voTMlcs)
+* [_Regularization Part 3: Elastic Net Regression_](https://www.youtube.com/watch?v=1dKRdX9bfIo)
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+

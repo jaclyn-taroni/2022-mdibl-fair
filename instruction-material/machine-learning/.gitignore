@@ -1,0 +1,2 @@
+# Ignore the OpenPBTA histologies dataset
+data/**/pbta-*
