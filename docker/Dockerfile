@@ -1,4 +1,4 @@
-FROM rocker/tidyverse:4.0.5
+FROM rocker/tidyverse:4.1.3
 WORKDIR /rocker-build/
 
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
@@ -50,39 +50,46 @@ RUN R -e "install.packages(c( \
   'glmnet', \
   'kernlab', \
   'R.utils', \
-  'rprojroot' \
+  'rprojroot', \
   'tidymodels', \
   'umap' \
 ))"
 
 # Install PLIER from github
-RUN R -e "remotes::install_github('wgmao/PLIER', ref = 'd9c46d46873444103edb47f29e322b16513fd597')"
+RUN R -e "remotes::install_github('wgmao/PLIER', ref = 'baf0dd488cf97752de657fcb7c39fcc994e9440d')"
 
-# Snakemake
-ENV SNAKEMAKE_VERSION 5.19.3
-RUN pip3 install snakemake==${SNAKEMAKE_VERSION}
+# conda
+# https://github.com/tschaffter/rstudio/blob/3aec9b6ca888c06121e6e3f269eefa8b4190c5e7/Dockerfile
+ENV MINICONDA3_VERSION py39_4.12.0
+ENV MINICONDA_BIN_PATH="/opt/miniconda/bin"
+ENV PATH="${PATH}:${MINICONDA_BIN_PATH}"
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA3_VERSION}-Linux-x86_64.sh && \
+    bash Miniconda3-${MINICONDA3_VERSION}-Linux-x86_64.sh \
+        -b \
+        -p /opt/miniconda && \
+    rm -f Miniconda3-${MINICONDA3_VERSION}-Linux-x86_64.sh && \
+    useradd -u 1500 -s /bin/bash miniconda && \
+    chown -R miniconda:miniconda /opt/miniconda && \
+    chmod -R go-w /opt/miniconda
 
-# MultiQC
-ENV MULTIQC_VERSION 1.9
-RUN pip3 install multiqc==${MULTIQC_VERSION}
+# Add conda channels
+RUN conda config --add channels defaults
+RUN conda config --add channels bioconda
+RUN conda config --add channels conda-forge
 
-# FastQC
-RUN apt update && apt install -y fastqc
+# Versions of software to be installed with conda
+ENV FASTP_VERSION 0.23.2
+ENV SALMON_VERSION 1.9.0
+ENV MULTIQC_VERSION 1.13a
+ENV SNAKEMAKE_VERSION 7.8.5
+ENV FASTQC_VERSION 0.11.9 
 
-# fastp 
-ENV FASTP_VERSION 0.20.1
-RUN git clone https://github.com/OpenGene/fastp.git
-RUN cd fastp && \
-    git checkout tags/v${FASTP_VERSION} -b v${FASTP_VERSION} && \
-    make && \
-    make install 
-
-# Salmon
-ENV SALMON_VERSION 1.4.0
-WORKDIR /usr/local/src
-RUN wget --quiet https://github.com/COMBINE-lab/salmon/releases/download/v${SALMON_VERSION}/salmon-${SALMON_VERSION}_linux_x86_64.tar.gz
-RUN tar xzf salmon-${SALMON_VERSION}_linux_x86_64.tar.gz && \
-    rm -f salmon-${SALMON_VERSION}_linux_x86_64.tar.gz && \
-    ln -s /usr/local/src/salmon-latest_linux_x86_64/bin/salmon /usr/local/bin/salmon
+# Install conda packages
+RUN conda install fastp=${FASTP_VERSION}
+RUN conda install salmon=${SALMON_VERSION} 
+RUN conda install snakemake=${SNAKEMAKE_VERSION}
+RUN conda install fastqc=${FASTQC_VERSION}
+RUN conda install multiqc=${MULTIQC_VERSION}
 
 WORKDIR /home/rstudio
