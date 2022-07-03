@@ -11,6 +11,11 @@ They are adapted from [Alex's Lemonade Stand Foundation](https://www.alexslemona
 Build with:
 
 ```
+# Use BuildKit with output that is easier to read
+export DOCKER_BUILDKIT=1
+export BUILDKIT_PROGRESS=plain
+
+# Build the image itself 
 docker build -t 2022-mdibl-fair docker/.
 ```
 
