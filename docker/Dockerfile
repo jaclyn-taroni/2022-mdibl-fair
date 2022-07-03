@@ -49,6 +49,7 @@ RUN R -e "install.packages(c( \
   'e1071', \
   'glmnet', \
   'kernlab', \
+  'markdown', \
   'R.utils', \
   'rprojroot', \
   'tidymodels', \
