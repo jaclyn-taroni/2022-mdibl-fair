@@ -7,7 +7,7 @@ output:
 date: 2021
 ---
 
-This notebook is designed to be self-guided, as your instructor is concerned about access to a stable internet connection at the time of instruction.
+This notebook is designed to be self-guided.
 To guard against potential technical mishaps, we include links to short lecture videos throughout as well as explanatory text.
 
 The BRCA classifier has been adapted from [Penn GCB 535](https://github.com/greenelab/GCB535) machine learning material; many of the videos we link to are from this course as well.
@@ -216,7 +216,7 @@ The first dataset we will be working with is data from the [METABRIC](https://ww
 metabric_exprs_df <- readr::read_tsv(file.path("data",
                                                "expression",
                                                "METABRIC_dataset.pcl")) %>%
-  tibble::column_to_rownames("X1")
+  tibble::column_to_rownames("...1")
 ```
 Gene expression data is typically stored with features as rows and samples as columns.
 Most machine learning packages will expect our observations/sames as columns and our features as rows.
@@ -448,7 +448,7 @@ In this case, we have a BRCA set from TCGA available so let's read it in and get
 tcga_exprs_df <- readr::read_tsv(file.path("data", 
                                            "expression", 
                                            "TCGA_dataset.pcl")) %>%
-  tibble::column_to_rownames("X1")
+  tibble::column_to_rownames("...1")
 
 # Transpose the matrix so samples are rows and genes are columns
 t_tcga_exprs <- t(as.matrix(tcga_exprs_df))
@@ -528,7 +528,7 @@ confusionMatrix(data = tcga_predicted_labels,
 
 Still pretty good accuracy, but since we have a class imbalance issue here we might want to look at kappa instead if we were to pick a single metric.
 
-Kappa values interpretation as originally laid out in n Landis & Koch (1977) (and via [this post](https://towardsdatascience.com/interpretation-of-kappa-values-2acd1ca7b18f)):
+Kappa values interpretation as originally laid out in Landis & Koch (1977) (and via [this post](https://towardsdatascience.com/interpretation-of-kappa-values-2acd1ca7b18f)):
 
 > Kappa value interpretation:
 > <0 No agreement

@@ -164,6 +164,7 @@ Make a matrix.
 
 ```{r get_medulloblastoma_mat, live = TRUE}
 medulloblastoma_rnaseq_mat <- collapsed_rnaseq_df %>%
+  select(-mean_value) %>%
   tibble::column_to_rownames("gene_symbol") %>%
   as.matrix()
 ```
@@ -287,10 +288,10 @@ dim(plier_results$Z)
 ```
 
 We can use _Z_ to tell us which genes contribute to individual LVs by accessing the column corresponding to that LV.
-We'll use 28 below, but you can change the number to suit your purposes!
+We'll use 20 below, but you can change the number to suit your purposes!
 
 ```{r lv_loadings}
-head(sort(plier_results$Z[, 28], 
+head(sort(plier_results$Z[, 20], 
           decreasing = TRUE), 
      n = 25)
 ```
@@ -427,12 +428,12 @@ sig_b_df <- inner_join(x = sig_b_df,
 ```
 ## Plotting
 
-We'll plot LV28; this is the latent variable that we looked at the loadings for in an earlier chunk.
+We'll plot LV20; this is the latent variable that we looked at the loadings for in an earlier chunk.
 
 ```{r lv_to_plot}
 # PLIER names certain latent variables based on their association with input
 # gene sets
-lv_to_plot <- rownames(plier_results$B)[28]
+lv_to_plot <- rownames(plier_results$B)[20]
 # For plotting, subset only to the rows corresponding to this latent variable
 lv_plot_df <- sig_b_df %>%
   filter(LV == lv_to_plot) 
