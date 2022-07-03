@@ -45,7 +45,7 @@ We recommend checking out the [Michigan State University Research Technology Sup
 #### View FastQC reports for samples from instruction
 
 We have generated FastQC reports for all samples we preprocess & quantify in class.
-They are tracked in this repository here: <https://github.com/jaclyn-taroni/2021-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports> You can view an HTML version of an individual FASTQ file by adding the filename to the end of this URL in your browser <https://jaclyn-taroni.github.io/2021-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports> For example, you'd navigate to the following URL for the `1_ATCACG_L001_R1_combined_fastqc.html` report: <https://jaclyn-taroni.github.io/2021-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports/1_ATCACG_L001_R1_combined_fastqc.html>
+They are tracked in this repository here: <https://github.com/jaclyn-taroni/2022-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports> You can view an HTML version of an individual FASTQ file by adding the filename to the end of this URL in your browser <https://jaclyn-taroni.github.io/2022-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports> For example, you'd navigate to the following URL for the `1_ATCACG_L001_R1_combined_fastqc.html` report: <https://jaclyn-taroni.github.io/2022-mdibl-fair/setup/bulk-rnaseq/QC/fastqc_reports/1_ATCACG_L001_R1_combined_fastqc.html>
 
 
 ### MultiQC
@@ -62,7 +62,7 @@ In addition, MultiQC is not limited to RNA-seq data; the website has example rep
 #### View a MultiQC report for samples from instruction
 
 We generated a MultiQC report from the FastQC, fastp, and Salmon reports for the 12 samples we looked at during instruction.
-You can view it [here](https://jaclyn-taroni.github.io/2021-mdibl-fair/setup/bulk-rnaseq/QC/multiqc_report.html).
+You can view it [here](https://jaclyn-taroni.github.io/2022-mdibl-fair/setup/bulk-rnaseq/QC/multiqc_report.html).
 
 ### tximeta
 
