@@ -4,7 +4,7 @@
 library(AnnotationHub)
 annotation_hub <- AnnotationHub()
 
-# Homo sapiens hg38 Ensembel release 103
+# Homo sapiens hg38 Ensembl release 103
 hs_ensembl_db <- annotation_hub[["AH89426"]]
 
 # Get tx2gene data frame
