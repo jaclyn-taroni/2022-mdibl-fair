@@ -183,17 +183,17 @@ Then, just in case there are any _other_ `quant.sf` files on the server in `/dat
 
 # Make sure these are files in "personal" data directories
 # Which are in `/data/workshop-*`
-salmon_files <- salmon_files[stringr::str_detect(salmon_files, "workshop-*")]
+salmon_files <- salmon_files[grep("workshop-*", salmon_files)]
 
 ```
 
 In the instructions for Salmon, everyone was asked to save their Salmon output in `/data/<USER NAME>/salmon/<SAMPLE IDENTIFIER>`.
-The `quant.sf` will be in the `<SAMPLE IDENTIFIER>` directory, so the second to last "word" when we split by forward slashes (`/`) should be the sample identifier.
+The `quant.sf` will be in the `<SAMPLE IDENTIFIER>` directory, so the fifth element when we split by forward slashes (`/`) should be the sample identifier.
 
 ```r
 # The sample identifier *should* always be the directory that contains the 
 # quant.sf file
-sample_identifiers <- stringr::word(salmon_files, -2, sep = .Platform$file.sep)
+sample_identifiers <- unlist(strsplit("/data/workshop-40/salmon/sample/quant.sf", .Platform$file.sep))[5]
 
 # In case folks have the same starting set of samples, we need to make these IDs
 # unique with `make.names()`.
@@ -214,15 +214,13 @@ tx2gene_file <- file.path("/data", "index", "Homo_sapiens",
 
 #### tximport
 
-We read in the transcript-to-gene tab-separated values file with `read_tsv()`. 
-`read_tsv()` comes from the `readr` package.
-We didn't load `readr` at the top of the script, so we can reference this function and this function only by using `::` nomenclature – `readr::read_tsv()`. 
+We read in the transcript-to-gene tab-separated values file with `read.table()`.
 
 ```r
 #### tximport ------------------------------------------------------------------
 
 # Read in tx2gene TSV
-tx2gene_df <- readr::read_tsv(tx2gene_file)
+tx2gene_df <- read.table(tx2gene_file, header = TRUE, sep = "\t")
 ```
 
 If we were to look at the first few rows of `tx2gene_df` (using `head()`), here's what we would see:
@@ -257,12 +255,12 @@ txi <- tximport(salmon_files,
                 ignoreTxVersion = TRUE)
 ```
 
-Finally, we write to file with another `readr` function `write_rds()`. 
+Finally, we write to an RDS file with `saveRDS()`. 
 Recall that `txi_file` is created by "pasting" together the directory specified with `--output_directory` and the filename specified with `--output_filename`.
 
 ```r
 # Save the tximport data as an RDS
-readr::write_rds(txi, txi_file)
+saveRDS(txi, txi_file)
 ```
 
 RDS is a special file format that we will cover in more detail below!
