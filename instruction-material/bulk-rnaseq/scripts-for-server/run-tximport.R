@@ -46,11 +46,11 @@ salmon_files <- list.files(path = "/data",
 
 # Make sure these are files in "personal" data directories
 # Which are in `/data/workshop-*`
-salmon_files <- salmon_files[stringr::str_detect(salmon_files, "workshop-*")]
+salmon_files <- salmon_files[grep("workshop-*", salmon_files)]
 
 # The sample identifier *should* always be the directory that contains the 
 # quant.sf file
-sample_identifiers <- stringr::word(salmon_files, -2, sep = .Platform$file.sep)
+sample_identifiers <- unlist(strsplit("/data/workshop-40/salmon/sample/quant.sf", .Platform$file.sep))[5]
 
 # In case folks have the same starting set of samples, we need to make these IDs
 # unique with `make.names()`.
@@ -66,7 +66,7 @@ tx2gene_file <- file.path("/data", "index", "Homo_sapiens",
 #### tximport ------------------------------------------------------------------
 
 # Read in tx2gene TSV
-tx2gene_df <- readr::read_tsv(tx2gene_file)
+tx2gene_df <- read.table(tx2gene_file, header = TRUE, sep = "\t")
 
 # tximport step
 txi <- tximport(salmon_files, 
@@ -76,4 +76,4 @@ txi <- tximport(salmon_files,
                 ignoreTxVersion = TRUE)
 
 # Save the tximport data as an RDS
-readr::write_rds(txi, txi_file)
+saveRDS(txi, txi_file)
